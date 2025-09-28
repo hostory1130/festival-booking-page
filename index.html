@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>처인성 축제 체험 예약 (데이터 저장 및 잔여 관리)</title>
+    
+    <style>
+        /* CSS: 디자인 스타일 */
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0; 
+            min-height: 100vh; 
+        }
+        .container { 
+            background-color: #ffffff; 
+            padding: 40px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            max-width: 600px; 
+            width: 100%; 
+            position: relative; 
+        }
+        h1 { 
+            color: #004d40; 
+            text-align: center; 
+            margin-bottom: 5px; 
+            font-size: 28px; 
+        }
+        h2 { 
+            color: #26a69a; 
+            text-align: center; 
+            margin-top: 0; 
+            margin-bottom: 25px; 
+            font-size: 20px; 
+            border-bottom: 2px solid #e0f2f1; 
+            padding-bottom: 10px; 
+        }
+        .description { 
+            text-align: center; 
+            color: #555; 
+            margin-bottom: 30px; 
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            font-weight: bold; 
+            margin-bottom: 8px; 
+            color: #333; 
+        }
+        input[type="text"], input[type="tel"], input[type="number"], select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            transition: border-color 0.3s; 
+        }
+        input:focus, select:focus { 
+            border-color: #004d40; 
+            outline: none; 
+        }
+        .submit-btn { 
+            background-color: #004d40; 
+            color: white; 
+            padding: 15px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            width: 100%; 
+            margin-top: 10px; 
+            transition: background-color 0.3s; 
+        }
+        .submit-btn:hover { 
+            background-color: #00796b; 
+        }
+        #success-message { 
+            display: none; 
+            text-align: center; 
+            padding: 30px; 
+            background-color: #e0f2f1; 
+            border: 1px solid #004d40; 
+            border-radius: 5px; 
+            margin-top: 20px; 
+        }
+        #reservation-result { 
+            font-size: 30px; 
+            font-weight: bold; 
+            color: #d84315; 
+            margin: 15px 0 0 0; 
+        }
+        #success-message p { 
+            font-size: 18px; 
+            color: #004d40; 
+            margin-bottom: 10px; 
+        }
+        
+        /* 돌아가기 버튼 스타일 */
+        .back-btn {
+            background-color: #26a69a;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 25px;
+            transition: background-color 0.3s;
+        }
+        .back-btn:hover {
+            background-color: #00897b;
+        }
+
+        /* 잔여 인원 표시 스타일 */
+        .remaining-info {
+            font-size: 14px;
+            color: #d84315;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div id="success-message">
+            <p>예약이 완료되었습니다! 🎉</p>
+            <p>고객님의 예약 정보는 다음과 같습니다.</p>
+            <p id="reservation-result">-- 부스명 - 예약번호 --</p>
+            <p style="font-size: 14px; color: #777; margin-top: 20px;">
+                *예약 결과는 스프레드시트에 저장되었습니다.
+            </p>
+            <button type="button" class="back-btn" onclick="location.reload()">새로운 예약하기</button>
+        </div>
+        
+        <form id="reservation-form">
+            <h1>처인성어울림센터 청소년 축제</h1>
+            <h2>부스 체험 예약 양식</h2>
+            
+            <p class="description">
+                원하는 부스 체험과 시간대를 선택하고 예약 정보를 입력해 주세요.
+            </p>
+
+            <div class="form-group">
+                <label for="booth_select">체험 부스 선택</label>
+                <select id="booth_select" name="booth_select" required>
+                    <option value="" disabled selected>부스를 선택해 주세요</option>
+                    <option value="부스1: 신나는 만들기 체험">부스1: 신나는 만들기 체험</option>
+                    <option value="부스2: VR 게임존">부스2: VR 게임존</option>
+                    <option value="부스3: 타로 카드 체험">부스3: 타로 카드 체험</option>
+                    <option value="부스4: 네일아트 & 페이스 페인팅">부스4: 네일아트 & 페이스 페인팅</option>
+                    <option value="부스5: 푸드 트럭 (간식)">부스5: 푸드 트럭 (간식)</option>
+                    <option value="부스6: 댄스 & 노래방">부스6: 댄스 & 노래방</option>
+                    <option value="부스7: 과학 실험실">부스7: 과학 실험실</option>
+                    <option value="부스8: 환경 보호 캠페인">부스8: 환경 보호 캠페인</option>
+                    <option value="부스9: 스포츠 체험존">부스9: 스포츠 체험존</option>
+                    <option value="부스10: 인생네컷 포토존">부스10: 인생네컷 포토존</option>
+                </select>
+                <div id="booth-remaining" class="remaining-info"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="time_select">체험 시간대 선택 (30분 단위)</label>
+                <select id="time_select" name="time_select" required>
+                    <option value="" disabled selected>시간을 선택해 주세요</option>
+                    <option value="14:00 ~ 14:30">14:00 ~ 14:30</option>
+                    <option value="14:30 ~ 15:00">14:30 ~ 15:00</option>
+                    <option value="15:00 ~ 15:30">15:00 ~ 15:30</option>
+                    <option value="15:30 ~ 16:00">15:30 ~ 16:00</option>
+                    <option value="16:00 ~ 16:30">16:00 ~ 16:30</option>
+                    <option value="16:30 ~ 17:00">16:30 ~ 17:00</option>
+                </select>
+                <div id="time-remaining" class="remaining-info"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="leader_name">예약자 이름</label>
+                <input type="text" id="leader_name" name="leader_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contact">예약자 연락처 (휴대폰)</label>
+                <input type="tel" id="contact" name="contact" pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}" placeholder="010-1234-5678 형식" required>
+            </div>
+
+            <div class="form-group">
+                <label for="participants">예약 인원 수</label>
+                <input type="number" id="participants" name="participants" min="1" max="10" value="1" required>
+            </div>
+
+            <button type="submit" class="submit-btn">예약 신청하기</button>
+        </form>
+    </div>
+
+    <script>
+        // 사용자님이 제공해주신 Google Apps Script URL
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzm55oHSQ_nxUhPgI9lrXJWYOhar8k89E2yHpXSZ5Y_UB8RXM0EhbS31L8BSjsG2o7y/exec'; 
+        let reservationData = {}; 
+        
+        const boothSelect = document.getElementById('booth_select');
+        const timeSelect = document.getElementById('time_select');
+        const timeRemainingDiv = document.getElementById('time-remaining');
+        const participantsInput = document.getElementById('participants');
+
+        // 1. 페이지 로드 시 잔여 인원 데이터를 서버에서 가져오는 함수
+        async function fetchReservationData() {
+            try {
+                const response = await fetch(GAS_URL + '?action=get_data'); 
+                const data = await response.json();
+                reservationData = data;
+                console.log("잔여 인원 데이터 로드 완료:", reservationData);
+                updateTimeOptions(); 
+            } catch (error) {
+                console.error("잔여 인원 데이터 로드 실패:", error);
+                timeRemainingDiv.textContent = "잔여 인원 로드 실패. GAS URL 또는 배포 상태를 확인해주세요.";
+            }
+        }
+
+        // 2. 부스 또는 시간이 선택될 때 잔여 인원을 업데이트하는 함수
+        function updateTimeOptions() {
+            const selectedBooth = boothSelect.value;
+            const selectedTime = timeSelect.value;
+            timeRemainingDiv.textContent = '';
+            
+            if (!selectedBooth || !reservationData[selectedBooth]) {
+                Array.from(timeSelect.options).forEach(option => {
+                    if (option.value) option.disabled = false;
+                    if (option.value && option.textContent.includes('잔여')) {
+                        option.textContent = option.value; 
+                    }
+                });
+                return;
+            }
+
+            // 모든 시간 옵션에 대해 잔여 인원을 체크하고 업데이트
+            Array.from(timeSelect.options).forEach(option => {
+                if (option.value) { 
+                    const timeValue = option.value;
+                    const remaining = reservationData[selectedBooth] ? reservationData[selectedBooth][timeValue] : -1;
+                    
+                    option.textContent = `${timeValue} (잔여: ${remaining}명)`;
+                    
+                    if (remaining <= 0) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                }
+            });
+
+            // 선택된 시간에 잔여 인원 최종 표시
+            if (selectedBooth && selectedTime && reservationData[selectedBooth]) {
+                const remaining = reservationData[selectedBooth][selectedTime];
+                if (remaining !== undefined) {
+                    timeRemainingDiv.textContent = `선택 시간 잔여 인원: ${remaining}명`;
+                    
+                    if (remaining < parseInt(participantsInput.value)) {
+                       timeRemainingDiv.textContent = `[경고] 선택 인원보다 잔여 인원(${remaining}명)이 적습니다. 인원수를 줄여주세요.`;
+                    }
+                }
+            }
+        }
+
+        // 3. 폼 제출 (예약 신청하기) 함수
+        document.getElementById('reservation-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const selectedBooth = boothSelect.value;
+            const selectedTime = timeSelect.value;
+            const requestedParticipants = parseInt(participantsInput.value);
+            
+            // 예약 인원수 최종 확인 (클라이언트 측 검증)
+            if (reservationData[selectedBooth] && reservationData[selectedBooth][selectedTime] < requestedParticipants) {
+                alert(`선택하신 시간(${selectedTime})의 잔여 인원(${reservationData[selectedBooth][selectedTime]}명)이 부족합니다. 인원수를 줄이거나 다른 시간을 선택해 주세요.`);
+                return; 
+            }
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const resultText = await response.text();
+
+                document.getElementById('reservation-form').style.display = 'none';
+                document.getElementById('reservation-result').textContent = resultText;
+                document.getElementById('success-message').style.display = 'block';
+
+            } catch (error) {
+                alert('예약 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                console.error('Error:', error);
+            }
+        });
+
+        // 이벤트 리스너 등록
+        boothSelect.addEventListener('change', updateTimeOptions);
+        timeSelect.addEventListener('change', updateTimeOptions);
+        participantsInput.addEventListener('input', updateTimeOptions); 
+        
+        // 페이지 로드 시 데이터 가져오기 시작
+        fetchReservationData();
+    </script>
+</body>
+</html>
